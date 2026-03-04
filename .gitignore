@@ -1,0 +1,14 @@
+*.local
+
+# Editor directories
+.vscode/
+.idea/
+*.sw?
+
+# Secrets
+.env
+*.pem
+*.key
+
+# Logs
+*.log
