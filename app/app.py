@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask
 import redis
 import os
 import json
@@ -19,26 +19,22 @@ print(f"Connecting to Redis at {redis_host}:{redis_port}")
 with open('quotes.json') as f:
     quotes = json.load(f)
 
-# Route for the home page - returns a welcome message with a link to the counter
+# Route for the home page
 @app.route('/')
 def home():
-    return '''
-        <h4>Welcome to Flask + Redis!</h4>
-        <a href="/count"><button>Go to Counter</button></a>
-    '''
-
-# Route for the counter - every visit increments the count in Redis
-@app.route('/count')
-def count():
-    # INCR atomically increments 'visit_count' by 1 and returns the new value
-    # If the key doesn't exist yet, Redis creates it starting at 0 before incrementing
     visit_count = redis_client.incr('visit_count')
-    return f'Visit count: {visit_count}'
+    return f'''
+        <h4>Welcome to my quote generator!</h4>
+        <a href="/quote"><button>Generate a quote</button></a>
+        <br><br>Counter: {visit_count}
+    '''
 
 @app.route('/quote')
 def quote():
     q = random.choice(quotes)
-    return jsonify(q)
+    count = redis_client.incr('quote_count')
+    
+    return f'"{q["text"]}"<br>- {q["author"]}<br><br>Global total quotes generated: {count}<br><a href="/quote"><button>New Quote</button></a>'
 
 # Only runs when executed directly (not when imported or run via a WSGI server)
 # 0.0.0.0 makes the app reachable from outside the container

@@ -4,7 +4,7 @@ This section focusses on documenting the changes made for each new feature
 ```
 Features/
 ├── Quotes
-├── (placeholder)
+├── Quote Counter + New Quote Button
 └── (placeholder)
 
 ```
@@ -24,7 +24,7 @@ A dedicated file to store all quotes outside of the application code, making the
 ```
 
 #### `app/app.py` - modified
-Add the imports needed to read the JSON file, select a random quote, and return a proper JSON response:
+Added the imports needed to read the JSON file, select a random quote, and return a proper JSON response:
 ```python
 import json
 import random
@@ -54,4 +54,39 @@ Without this line, `quotes.json` would not be included in the Docker image and t
 COPY quotes.json .
 ```
 
+---
+
+## 2. Quote Counter + New Quote Button
+
+#### `app/app.py` - modified
+Increments a `quote_count` key in Redis each time `/quote` is called and returns the total alongside the quote. A "New Quote" button is included in the response so the user can request another quote without going back to the home page:
+```python
+@app.route('/quote')
+def quote():
+    q = random.choice(quotes)
+    count = redis_client.incr('quote_count')
+    return f'"{q["text"]}"<br>- {q["author"]}<br><br>Quotes generated: {count}<br><a href="/quote"><button>New Quote</button></a>'
+```
+
+`quote_count` is a separate Redis key from `visit_count` — they track independently and do not affect each other.
+
+Changed the default route to generate a quote instead of count button
+```py
+    return '''
+        <h4>Welcome to Flask + Redis!</h4>
+        <a href="/quote"><button>Generate a quote</button></a>
+    '''
+```
+
+Removed `/count` path and modified home route, counter now increments on each visit
+```py
+@app.route('/')
+def home():
+    visit_count = redis_client.incr('visit_count')
+    return f'''
+        <h4>Welcome to my quote generator!</h4>
+        <a href="/quote"><button>Generate a quote</button></a>
+        <br>Counter: {visit_count}
+    '''
+```
 ---
