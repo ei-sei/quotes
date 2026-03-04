@@ -1,6 +1,8 @@
-from flask import Flask
+from flask import Flask, jsonify
 import redis
-import os  # lets us read environment variables set by Docker
+import os
+import json
+import random
 
 app = Flask(__name__)
 
@@ -12,7 +14,10 @@ redis_port = int(os.getenv('REDIS_PORT', '6379'))  # cast to int - Redis client 
 # Connect to Redis
 redis_client = redis.Redis(host=redis_host, port=redis_port, decode_responses=True)
 
-print(f"Connecting to Redis at {redis_host}:{redis_port}")  # logs to container output - useful for debugging
+print(f"Connecting to Redis at {redis_host}:{redis_port}")
+
+with open('quotes.json') as f:
+    quotes = json.load(f)
 
 # Route for the home page - returns a welcome message with a link to the counter
 @app.route('/')
@@ -29,6 +34,11 @@ def count():
     # If the key doesn't exist yet, Redis creates it starting at 0 before incrementing
     visit_count = redis_client.incr('visit_count')
     return f'Visit count: {visit_count}'
+
+@app.route('/quote')
+def quote():
+    q = random.choice(quotes)
+    return jsonify(q)
 
 # Only runs when executed directly (not when imported or run via a WSGI server)
 # 0.0.0.0 makes the app reachable from outside the container

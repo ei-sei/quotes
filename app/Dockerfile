@@ -12,6 +12,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application code
 COPY app.py .
+COPY quotes.json .
 
 # Expose port (documentation)
 EXPOSE 5002
