@@ -31,6 +31,7 @@ Further develops from my [flask-redis-project](https://github.com/ei-sei/DevOps/
 
 Create .env variable with following values
 ```
+
 REDIS_HOST=redis
 REDIS_PORT=6379
 ```
@@ -43,11 +44,30 @@ Visit `http://localhost` in your browser.
 
 ## Deployment (EC2)
 
+**Deploy**
 ```bash
 git clone https://github.com/ei-sei/quotes
 cd quotes
 # Add your .env file
 docker compose up --build -d
+```
+
+**If Docker is not installed**
+```bash
+# Remove any old versions
+sudo apt remove docker docker-engine docker.io containerd runc
+
+# Install via convenience script (easiest)
+curl -fsSL https://get.docker.com -o get-docker.sh
+sudo sh get-docker.sh
+
+# Add your user to the docker group (so you don't need sudo every time)
+sudo usermod -aG docker $USER
+newgrp docker
+
+# Verify
+docker --version
+docker compose version
 ```
 
 Ensure port 80 is open in your EC2 security group.
