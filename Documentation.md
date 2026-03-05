@@ -9,6 +9,12 @@ Features/
 
 ```
 
+```
+Issues/
+└── Port 80 conflict on EC2 deployment
+
+```
+
 ---
 
 ## 1. Quotes
@@ -89,4 +95,31 @@ def home():
         <br>Counter: {visit_count}
     '''
 ```
+---
+
+## Issue: Port 80 conflict on EC2 deployment
+
+After pulling the repository and running `docker compose up --build` on EC2, the following error appeared:
+
+```
+Error response from daemon: failed to set up container networking: driver failed programming
+external connectivity on endpoint nginx-lb: failed to bind host port 0.0.0.0:80/tcp: address already in use
+```
+
+The message `failed to bind host port 0.0.0.0:80/tcp: address already in use` indicates port 80 was already occupied on the host. Running the following confirmed nginx was the process using it:
+
+```bash
+sudo ss -tlnp | grep :80
+```
+
+Nginx had been installed and configured directly on the EC2 instance previously and was still running, blocking Docker from binding port 80 for the nginx container.
+
+**Fix:** Stop and disable the host nginx service, then redeploy:
+
+```bash
+sudo systemctl stop nginx
+sudo systemctl disable nginx
+docker compose up -d
+```
+
 ---
