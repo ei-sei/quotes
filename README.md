@@ -27,6 +27,11 @@ Further develops from my [flask-redis-project](https://github.com/ei-sei/DevOps/
 | `GET /` | Home page with visit counter |
 | `GET /quote` | Returns a random Stoic quote |
 
+## Preview
+
+![Home page](assets/home.png)
+![Quote page](assets/quote.png)
+
 ## Running Locally
 
 Create .env variable with following values
