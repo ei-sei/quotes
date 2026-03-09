@@ -1,4 +1,5 @@
 from flask import Flask
+from flask import render_template
 import redis
 import os
 import json
@@ -23,18 +24,14 @@ with open('quotes.json') as f:
 @app.route('/')
 def home():
     visit_count = redis_client.incr('visit_count')
-    return f'''
-        <h4>Welcome to my quote generator!</h4>
-        <a href="/quote"><button>Generate a quote</button></a>
-        <br><br>Counter: {visit_count}
-    '''
+    return render_template('index.html', title='welcome', message=f'Visits: {visit_count}')
 
 @app.route('/quote')
 def quote():
     q = random.choice(quotes)
     count = redis_client.incr('quote_count')
     
-    return f'"{q["text"]}"<br>- {q["author"]}<br><br>Global total quotes generated: {count}<br><a href="/quote"><button>New Quote</button></a>'
+    return render_template('index.html', quote=q, message=f'Quotes generated: {count}')
 
 # Only runs when executed directly (not when imported or run via a WSGI server)
 # 0.0.0.0 makes the app reachable from outside the container

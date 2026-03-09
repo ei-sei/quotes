@@ -5,13 +5,14 @@ This section focusses on documenting the changes made for each new feature
 Features/
 ├── Quotes
 ├── Quote Counter + New Quote Button
-└── (placeholder)
+└── Jinja2 Templates
 
 ```
 
 ```
 Issues/
-└── Port 80 conflict on EC2 deployment
+├── Port 80 conflict on EC2 deployment
+└── TemplateNotFound after switching to Jinja2
 
 ```
 
@@ -97,7 +98,71 @@ def home():
 ```
 ---
 
-## Issue: Port 80 conflict on EC2 deployment
+## 3. Jinja2 Templates
+
+Replaced inline HTML strings in route handlers with Jinja2 templates. Flask includes Jinja2 by default, so no new dependencies were needed. This separates the presentation layer from the application logic, making it easier to update the UI without modifying Python code.
+
+#### `app/templates/index.html` - new file
+A single shared template used by both the `/` and `/quote` routes. It conditionally renders the quote block only when a quote is passed:
+```html
+<!DOCTYPE html>
+<html>
+<head><title>Quotes</title></head>
+<body>
+  <h1>{{ title }}</h1>
+  <p>{{ message }}</p>
+
+  {% if quote %}
+    <blockquote>"{{ quote.text }}" - {{ quote.author }}</blockquote>
+  {% endif %}
+
+  <a href="/quote">New Quote</a>
+</body>
+</html>
+```
+
+- `{{ variable }}` outputs a value
+- `{% if %}` conditionally renders a block
+- The `quote` variable is only passed by the `/quote` route, so the home page skips the blockquote
+
+#### `app/app.py` - modified
+Replaced `jsonify` import with `render_template` and updated both routes to return templates instead of inline HTML strings:
+```python
+from flask import render_template
+```
+
+Home route now passes `title` and `message` as template variables:
+```python
+@app.route('/')
+def home():
+    visit_count = redis_client.incr('visit_count')
+    return render_template('index.html', title='welcome', message=f'Visits: {visit_count}')
+```
+
+Quote route passes the quote object along with the counter message:
+```python
+@app.route('/quote')
+def quote():
+    q = random.choice(quotes)
+    count = redis_client.incr('quote_count')
+    return render_template('index.html', quote=q, message=f'Quotes generated: {count}')
+```
+
+Flask automatically looks for templates in a `templates/` directory relative to the application file - no path prefix needed.
+
+#### `app/Dockerfile` - modified
+Added a line to copy the templates directory into the container image:
+```dockerfile
+COPY templates/ templates/
+```
+
+Without this, the container would crash with `jinja2.exceptions.TemplateNotFound: index.html` since the template files would not exist inside the image.
+
+---
+
+## Issue:
+
+### Port 80 conflict on EC2 deployment
 
 After pulling the repository and running `docker compose up --build` on EC2, the following error appeared:
 
@@ -123,3 +188,26 @@ docker compose up -d
 ```
 
 ---
+
+### TemplateNotFound after switching to Jinja2
+
+After updating `app.py` to use `render_template()` instead of inline HTML strings, the app returned a 500 Internal Server Error. The Flask logs showed:
+
+```
+jinja2.exceptions.TemplateNotFound: index.html
+```
+
+**Missing COPY in Dockerfile**
+
+The `templates/` directory was not being copied into the Docker image. Even though the template existed locally, it was absent inside the container:
+```dockerfile
+# Added to Dockerfile
+COPY templates/ templates/
+```
+
+**Fix:** added the `COPY templates/ templates/` line to the Dockerfile, then rebuilt:
+
+```bash
+docker compose up --build
+```
+

@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head><title>Quotes</title></head>
+<body>
+  <h1>{{ title }}</h1>
+  <p>{{ message }}</p>
+
+  {% if quote %}
+    <blockquote>"{{ quote.text }}" - {{ quote.author }}</blockquote>
+  {% endif %}
+
+  <a href="/quote">New Quote</a>
+</body>
+</html>
