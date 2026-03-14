@@ -5,7 +5,8 @@ This section focusses on documenting the changes made for each new feature
 Features/
 ├── Quotes
 ├── Quote Counter + New Quote Button
-└── Jinja2 Templates
+├── Jinja2 Templates
+└── Styled UI
 
 ```
 
@@ -157,6 +158,53 @@ COPY templates/ templates/
 ```
 
 Without this, the container would crash with `jinja2.exceptions.TemplateNotFound: index.html` since the template files would not exist inside the image.
+
+---
+
+## 4. Styled UI
+
+Added CSS styling directly inside `index.html` to replace the unstyled default browser look with a polished, responsive design. No new files or dependencies were needed since all styles live in a `<style>` block within the template.
+
+#### `app/templates/index.html` - modified
+Rewrote the template with embedded CSS and a structured layout. The Jinja2 logic remains the same, only the surrounding HTML and styling changed:
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quotes</title>
+  <style>
+    ...
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>{{ title }}</h1>
+    <p class="message">{{ message }}</p>
+
+    {% if quote %}
+      <blockquote>
+        {{ quote.text }}
+        <span class="author">- {{ quote.author }}</span>
+      </blockquote>
+    {% endif %}
+
+    <a href="/quote" class="btn">New Quote</a>
+  </div>
+</body>
+</html>
+```
+
+Key style choices:
+- **Layout** - Flexbox centers the content vertically and horizontally on the page. A `.container` wrapper caps the width at 600px so lines stay readable
+- **Background** - Dark purple/indigo gradient (`#0f0c29` to `#302b63` to `#24243e`) gives a modern feel without needing images
+- **Typography** - Georgia serif font with light weight and letter-spacing for a clean, editorial look
+- **Quote block** - A large decorative opening quotation mark (`::before` pseudo-element) in semi-transparent purple, italic text, and a separated author line
+- **Button** - Pill-shaped outline button (`border-radius: 50px`) with a purple glow (`box-shadow`) on hover
+- **Responsive** - Viewport meta tag and percentage-based widths ensure the layout adapts to mobile screens
+
+No changes were needed to `app.py` or the Dockerfile since no new files were added and the template filename stayed the same.
 
 ---
 

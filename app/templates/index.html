@@ -1,14 +1,110 @@
 <!DOCTYPE html>
-<html>
-<head><title>Quotes</title></head>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quotes</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Georgia', serif;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      color: #e0e0e0;
+      padding: 2rem;
+    }
+
+    .container {
+      text-align: center;
+      max-width: 600px;
+      width: 100%;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      font-weight: 300;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.5rem;
+      color: #ffffff;
+    }
+
+    .message {
+      font-size: 1rem;
+      color: #a0a0b8;
+      margin-bottom: 2.5rem;
+    }
+
+    blockquote {
+      font-size: 1.4rem;
+      font-style: italic;
+      line-height: 1.8;
+      padding: 2rem 2.5rem;
+      margin-bottom: 2.5rem;
+      position: relative;
+      color: #d0d0e0;
+    }
+
+    blockquote::before {
+      content: "\201C";
+      font-size: 5rem;
+      position: absolute;
+      top: -0.5rem;
+      left: -0.2rem;
+      color: #6c63ff;
+      opacity: 0.4;
+      font-family: Georgia, serif;
+    }
+
+    .author {
+      display: block;
+      margin-top: 1rem;
+      font-size: 1rem;
+      font-style: normal;
+      color: #8888aa;
+      letter-spacing: 0.05em;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 0.8rem 2rem;
+      font-size: 1rem;
+      font-family: inherit;
+      color: #ffffff;
+      background: transparent;
+      border: 1px solid #6c63ff;
+      border-radius: 50px;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      letter-spacing: 0.05em;
+    }
+
+    .btn:hover {
+      background: #6c63ff;
+      box-shadow: 0 0 20px rgba(108, 99, 255, 0.4);
+    }
+  </style>
+</head>
 <body>
-  <h1>{{ title }}</h1>
-  <p>{{ message }}</p>
+  <div class="container">
+    <h1>{{ title }}</h1>
+    <p class="message">{{ message }}</p>
 
-  {% if quote %}
-    <blockquote>"{{ quote.text }}" - {{ quote.author }}</blockquote>
-  {% endif %}
+    {% if quote %}
+      <blockquote>
+        {{ quote.text }}
+        <span class="author">- {{ quote.author }}</span>
+      </blockquote>
+    {% endif %}
 
-  <a href="/quote">New Quote</a>
+    <a href="/quote" class="btn">New Quote</a>
+  </div>
 </body>
 </html>
